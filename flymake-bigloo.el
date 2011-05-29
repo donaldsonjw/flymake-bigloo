@@ -61,24 +61,22 @@
    check-syntax target. If one is found return its location, otherwise return
    nil" 
   (catch 'found 
-    (dolist (name *flymake-bigloo-buildfile-list*)
-      (let ((result (locate-dominating-file start-dir name)))
-	(cond ((and result 
-		    (file-contains-flymake-target-p 
-		     (concat (file-name-as-directory result) name)))
-	       (throw 'found result))
-	      (result
-	       (let ((result2 (flymake-bigloo-find-buildfile-dir 
-			       (parent-dir result))))
-		 (when result2 (throw 'found result2))))
-	      (t
-	       nil))))))
+    (let ((curr-dir start-dir))
+      (while (not (string= curr-dir "/"))
+	(dolist (name flymake-bigloo-buildfile-list)
+	  (let ((result (locate-dominating-file curr-dir name)))
+	    (when (and result 
+		       (file-contains-flymake-target-p 
+			(concat (file-name-as-directory result) name)))
+	      (throw 'found result))))
+	(setq curr-dir (parent-dir curr-dir))
+	nil))))
 
 (defun file-contains-flymake-target-p (filename)
   "does the file contain a check-syntax target?"
   (save-excursion 
     (let* ((buffer (find-file filename))
-	   (result (search-forward *flymake-bigloo-buildfile-target* nil t)))
+	   (result (search-forward flymake-bigloo-buildfile-target nil t)))
       (kill-buffer buffer)
       result)))
 
