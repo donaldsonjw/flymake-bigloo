@@ -15,21 +15,6 @@
 ;;;;     License along with flymake-bigloo.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
 ;;;; Copyright(c) 2011 Joseph Donaldson(donaldsonjw@yahoo.com) 
-;;;; This file is part of flymake-bigloo.
-;;;;
-;;;;     flymake-bigloo is free software: you can redistribute it and/or modify
-;;;;     it under the terms of the GNU Lesser General Public License as
-;;;;     published by the Free Software Foundation, either version 3 of the
-;;;;     License, or (at your option) any later version.
-;;;;
-;;;;     flymake-bigloo is distributed in the hope that it will be useful, but
-;;;;     WITHOUT ANY WARRANTY; without even the implied warranty of
-;;;;     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;;;;     Lesser General Public License for more details.
-;;;;
-;;;;     You should have received a copy of the GNU General Public
-;;;;     License along with Pthread-extra.  If not, see
-;;;;     <http://www.gnu.org/licenses/>.
 
 (provide 'flymake-bigloo) 
 (require 'flymake) 
@@ -62,7 +47,7 @@
    nil" 
   (catch 'found 
     (let ((curr-dir start-dir))
-      (while (not (string= curr-dir "/"))
+      (while curr-dir 
 	(dolist (name flymake-bigloo-buildfile-list)
 	  (let ((result (locate-dominating-file curr-dir name)))
 	    (when (and result 
