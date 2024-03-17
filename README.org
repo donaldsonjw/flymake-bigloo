@@ -1,0 +1,51 @@
+* Flymake-bigloo Readme
+
+** Description
+flymake-bigloo is a Flymake syntax checker for the programming language Bigloo. The file to be checked is passed to the compiler and any resulting errors are parsed and displayed. This is achieved by searching the current directory and its parent directories recursively for a makefile with a =check-syntax= target. If found, the target is called with the environment variable =CHK_SOURCES= set to the file to be checked. The =check-syntax= target should establish the necessary include paths, compiler flags and dependencies.
+
+** Installation
+Installation is straight forward. Firstly, you need to copy flymake-bigloo.el to either a location already on your elisp =load-path= or add the current location of flymake-bigloo.el to the =load-path=. This will look similar to:
+
+#+begin_src emacs-lisp
+(add-to-list 'load-path "/dir/to/flymake-bigloo-dir")
+#+end_src 
+
+Finally, add the following line to your emacs initialization file. 
+
+#+begin_src emacs-lisp
+(require 'flymake-bigloo)
+#+end_src
+
+** Customization
+
+Flymake-bigloo provides the following customizable options:
+
++ =flymake-bigloo-command= :: This is the command used by the flymake-bigloo backend. It is a list of strings -- representing the external command and arguments to run -- or a symbol naming a thunk (i.e., argumentless function) that produces such a list. The thunk is called in the context of the buffer being checked. The default value is:
+#+begin_src emacs-lisp
+flymake-bigloo-use-special-make-target
+#+end_src 
+=flymake-bigloo-use-special-make-target= assumes that the project is built using Make and that a target for checking syntax exists. The target is provided by =flymake-bigloo-buildfile-target=.
+  + =flymake-bigloo-error-regexps= :: The list of Bigloo error regexps to use. The default value is:
+    ,#+begin_src emacs-lisp
+  '("File \"\\(?1:[^\"]+\\)\", line \\(?2:[0-9]+\\), character \\([0-9]+\\):[\012]\\(?4:\\(.+[\012]\\)+\\)"
+      "\\(?:\*\*\* \\(?4:ERROR:\\(.+[\012]\\)\\{2\\}\\)\\)")
+#+end_src
++ =flymake-bigloo-buildfile-list= :: The list of buildfile (e.g., makefile) names to search. The default value is:
+  #+begin_src emacs-lisp
+'("Makefile" "makefile" "GNUmakefile" "Makefile.inc")
+#+end_src
++  =flymake-bigloo-buildfile-target= :: The name of the check syntax build file target. The default is:
+#+begin_src emacs-lisp
+ "check-syntax" 
+#+end_src 
+
+** Example Makefile Target
+
+A simple check syntax target is below:
+
+#+begin_src emacs-lisp 
+check-syntax: .afile
+	$(BIGLOO) -syntax-check ${CHK_SOURCES}
+#+end_src
+
+The dependency on the .afile target guarantees that an appropriate .afile is created and all of the bigloo modules can be found. In most cases, you will also need to add additional compiler flags, include paths, and library paths. 
