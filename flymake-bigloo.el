@@ -21,8 +21,9 @@
 (require 'subr-x)
 
 (defcustom flymake-bigloo-error-regexps
-  '("File \"\\(?1:[^\"]+\\)\", line \\(?2:[0-9]+\\), character \\([0-9]+\\):[\012]\\(?4:\\(.+[\012]\\)+\\)"
-    "\\(?:\*\*\* \\(?4:ERROR:\\(.+[\012]\\)\\{2\\}\\)\\)")
+  '("File \"\\(?1:[^\"]+\\)\", line \\(?2:[0-9]+\\), character \\([0-9]+\\):[\012]\\(?4:\\(.+[\012]\\)\\{4\\}\\)"
+    "\\(?:\*\*\* \\(?4:ERROR:\\(.+[\012]\\)\\{2\\}\\)\\)"
+    "\\(?:\*\*\* \\(?4:WARNING:\\(.+[\012]\\)\\{2\\}\\)\\)")
   "The list of bigloo error regexps"
   :type '(repeat (string))
   :group 'flymake-bigloo)
@@ -129,17 +130,21 @@ nil"
       (catch 'exit 
 	(dolist (regexp flymake-bigloo-error-regexps)
      	  (let ((match-start (string-match regexp msg)))
-     	    (when match-start
+            (when match-start
 	      (let* ((line (let ((lm (match-string 2 msg)))
                              (if lm (string-to-number lm) 0)))
-		     (message (match-string 4 msg))
+		     (msg (match-string 4 msg))
                      (region (flymake-diag-region source line)))
-                (message "line: %s" line)
-     		(setq errs
-                      (cons (flymake-make-diagnostic source
-                                                     (car region)
-                                                     (cdr region)
-                                                     :error message)
+               	(setq errs
+                      (cons (if (string-match "^ERROR" msg)
+                                (flymake-make-diagnostic source
+                                                         (car region)
+                                                         (cdr region)
+                                                         :error msg)
+                              (flymake-make-diagnostic source
+                                                         (car region)
+                                                         (cdr region)
+                                                         :warning msg))
                                  errs))
 		(throw 'exit nil)))))))))
 
